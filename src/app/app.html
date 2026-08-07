@@ -1,5 +1,6 @@
 <header class="header">
   <h1>ポケモン図鑑ミニ</h1>
+  <span class="fav-count" [attr.aria-label]="'お気に入り ' + favCount() + '件'">★ {{ favCount() }}</span>
 </header>
 
 <main class="main">

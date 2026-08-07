@@ -19,6 +19,8 @@ export class App {
   readonly query = signal('');
   readonly favoriteIds = signal<ReadonlySet<number>>(new Set());
 
+  readonly favCount = computed(() => this.favoriteIds().size);
+
   // ─── 状態から導出される表示リスト ───
   readonly filtered = computed(() => {
     const q = this.query().trim().toLowerCase();

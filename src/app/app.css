@@ -2,6 +2,13 @@
   background: #e3350d;
   color: #fff;
   padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fav-count {
+  font-weight: 700;
 }
 
 .header h1 {
