@@ -43,3 +43,14 @@
 .empty {
   color: #7c828a;
 }
+
+.footer {
+  padding: 24px 20px;
+  text-align: center;
+  font-size: 12px;
+  color: #7c828a;
+}
+
+.footer a {
+  color: #e3350d;
+}
