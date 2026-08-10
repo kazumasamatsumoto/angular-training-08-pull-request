@@ -4,6 +4,10 @@
 
 **進め方は2通り。研修で権限をもらっている場合は A、そうでなければ B(フォーク)で進めます。**
 
+![Pull Request の流れ](docs/pr-flow.png)
+
+> 図の原本は [docs/pr-flow.drawio](docs/pr-flow.drawio)([draw.io](https://app.diagrams.net) で編集可)
+
 ---
 
 ## 0. リポジトリを手元に用意する

@@ -1,5 +1,11 @@
 # 課題08 練習課題 回答例・記入例
 
+> **動くコード:** この回答例を実際に適用したソースコードが `exercises-answers` ブランチにあります。
+> `git switch exercises-answers` で切り替えて動かせます(GitHub 上では branch 切り替えで閲覧)。
+> **回答版デモ:** https://kadai08-answers.vercel.app
+> ブランチのコミットが、そのまま PR に積むべきコミットの単位になっています。
+
+
 ---
 
 ## 練習1: 2本目の PR
