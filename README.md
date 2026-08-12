@@ -1,35 +1,47 @@
-# 課題08: PR を出す
+# 課題08: PR を出す(AWS CodeCommit 版)
 
-**ゴール:** 「ブランチ → 変更 → push → Pull Request 作成 → レビュー対応 → マージ」の一連の流れを、実際に GitHub 上で1回完走する。
+**ゴール:** 「ブランチ → 変更 → push → Pull Request 作成 → レビュー対応 → マージ」の一連の流れを、実際に AWS CodeCommit 上で1回完走する。
 
-**進め方は2通り。研修で権限をもらっている場合は A、そうでなければ B(フォーク)で進めます。**
+> このブランチは GitHub 版(`main` ブランチの README)を **AWS CodeCommit で進める場合の手順**に置き換えたものです。変更する内容(フッター追加)は GitHub 版と同じです。
 
 ![Pull Request の流れ](docs/pr-flow.png)
 
-> 図の原本は [docs/pr-flow.drawio](docs/pr-flow.drawio)([draw.io](https://app.diagrams.net) で編集可)
+> 図の原本は [docs/pr-flow.drawio](docs/pr-flow.drawio)([draw.io](https://app.diagrams.net) で編集可)。流れ自体は GitHub でも CodeCommit でも同じです。
+
+> **注意:** CodeCommit は 2024年7月以降、新規の AWS アカウントでは利用開始できません。この手順書は、研修用の CodeCommit リポジトリが既に用意されている(既存アカウントで利用中の)前提で進めます。
 
 ---
 
 ## 0. リポジトリを手元に用意する
 
-### A. このリポジトリに push 権限がある場合
+CodeCommit には GitHub のような「フォーク」はありません。**全員が同じリポジトリに自分のブランチを push する**方式で進めます(研修で IAM ユーザー/ロールの権限をもらってください)。
+
+接続方法は2通りあります。どちらか1つでOKです。
+
+### A. HTTPS(Git 認証情報)で clone する場合
+
+1. AWS コンソール → **IAM → ユーザー → 自分のユーザー → セキュリティ認証情報** タブを開きます。
+2. **「AWS CodeCommit の HTTPS Git 認証情報」→ 認証情報を生成** を押し、ユーザー名とパスワードを控えます(パスワードは生成時しか見られません)。
+3. clone します。ユーザー名/パスワードを聞かれたら 2. で控えたものを入力します。
 
 ```bash
-git clone <このリポジトリのURL>
+git clone https://git-codecommit.ap-northeast-1.amazonaws.com/v1/repos/angular-training-08-pull-request
 cd angular-training-08-pull-request
 npm install
 ```
 
-### B. 権限がない場合(フォーク)
+### B. git-remote-codecommit(GRC)で clone する場合(AWS CLI を使っている人向け)
 
-1. GitHub でこのリポジトリのページを開き、右上の **Fork** ボタンを押します。
-2. 自分のアカウントにできたフォークを clone します。
+`aws configure`(または SSO)で認証済みなら、Git 認証情報の発行は不要です。
 
 ```bash
-git clone <自分のフォークのURL>
+pip install git-remote-codecommit
+git clone codecommit::ap-northeast-1://angular-training-08-pull-request
 cd angular-training-08-pull-request
 npm install
 ```
+
+> URL の `ap-northeast-1` は研修用リポジトリのリージョンに合わせてください。
 
 ## 1. 課題内容を確認する
 
@@ -47,6 +59,7 @@ git switch -c feature/add-credit-footer
 ```
 
 > ブランチ名は「何をするブランチか」が分かる名前にします。`fix-bug` や `work` は避けます。
+> 全員が同じリポジトリに push するので、他の人とぶつかる場合は `feature/add-credit-footer-yamada` のように名前を付け足します。
 
 ## 3. 変更を実装する
 
@@ -104,29 +117,30 @@ git push -u origin feature/add-credit-footer
 
 ## 6. Pull Request を作成する
 
-### GitHub の画面で作る場合
+### AWS コンソールで作る場合
 
-1. ブラウザでリポジトリ(B の場合はフォーク元)のページを開きます。
-2. 黄色い帯 **「Compare & pull request」** ボタンが出ているので押します(出ていない場合: **Pull requests タブ → New pull request** → compare に自分のブランチを選択)。
-3. タイトルはコミットメッセージと同じでOK: `feat: フッターにデータ出典(PokeAPI)の表記を追加`
-4. 本文にはテンプレート(`.github/PULL_REQUEST_TEMPLATE.md`)が自動で入ります。**すべての欄を埋めます:**
+1. AWS コンソール → **CodeCommit → リポジトリ → angular-training-08-pull-request** を開きます。
+2. 左メニュー(またはリポジトリ画面上部)の **「プルリクエスト」→「プルリクエストの作成」** を押します。
+3. **ターゲット(マージ先)に `main`、ソースに `feature/add-credit-footer`** を選び、**「比較」** を押して差分が出ることを確認します。
+4. タイトルはコミットメッセージと同じでOK: `feat: フッターにデータ出典(PokeAPI)の表記を追加`
+5. CodeCommit には GitHub のような PR テンプレートの自動挿入がないので、**説明欄に次の項目を自分で書きます:**
    - What: フッターに PokeAPI への出典表記とリンクを追加した
    - Why: データ・画像の出典明記が推奨されているため
-   - 動作確認: チェックボックスを実際に確認してからチェック
-   - スクリーンショット: フッター部分を撮って貼る(macOS: ⇧⌘4)
-5. **Create pull request** を押します。
+   - 動作確認: `npx ng serve` でフッターの表示を確認した
+6. **「プルリクエストの作成」** を押します。
 
-### CLI で作る場合(gh コマンドがある人向け)
+### CLI で作る場合(AWS CLI がある人向け)
 
 ```bash
-gh pr create --title "feat: フッターにデータ出典(PokeAPI)の表記を追加" --web
+aws codecommit create-pull-request \
+  --title "feat: フッターにデータ出典(PokeAPI)の表記を追加" \
+  --description "What: フッターに PokeAPI への出典表記とリンクを追加した / Why: データ・画像の出典明記が推奨されているため" \
+  --targets repositoryName=angular-training-08-pull-request,sourceReference=feature/add-credit-footer,destinationReference=main
 ```
-
-(`--web` でブラウザが開き、テンプレートを埋めて提出できます)
 
 ## 7. レビューコメントに対応する
 
-研修ではレビュアー(講師またはペアの受講者)がコメントを付けます。典型例:
+研修ではレビュアー(講師またはペアの受講者)が、PR の **「変更」タブ**の該当行にコメントを付けます。典型例:
 
 > 「`target="_blank"` のリンクであることが見た目で分からないので、リンク後ろに ↗ を付けてください」
 
@@ -141,14 +155,15 @@ gh pr create --title "feat: フッターにデータ出典(PokeAPI)の表記を�
    git push
    ```
 
-3. **push するだけで PR に自動で反映されます。** PR 画面をリロードしてコミットが増えていることを確認します。
-4. コメント欄に「修正しました」と返信し、指摘してくれた人に **Resolve** してもらいます。
+3. **push するだけで PR に自動で反映されます。** PR 画面をリロードし、「変更」タブの差分とコミットが増えていることを確認します。
+4. コメントに「修正しました」と**返信**します(CodeCommit には GitHub の Resolve ボタンに相当する機能がないので、返信で完了を伝えます)。
 
 ## 8. マージする
 
-1. レビュアーの **Approve** が付いたら、PR 画面の **Merge pull request → Confirm merge** を押します。
-2. **Delete branch** ボタンでリモートブランチを削除します(マージ済みブランチは残さない)。
-3. 手元も最新にします。
+1. レビュアーに PR 画面右上の **「承認」** を押してもらいます(承認ルールが設定されている場合は、必要数の承認が揃うまでマージできません)。
+2. 承認が付いたら **「マージ」** を押し、マージ戦略を選びます。今回は **「早送りマージ(fast-forward)」** のままでOKです(選べない場合は「3ウェイマージ」)。
+3. **「ソースブランチ feature/add-credit-footer を削除しますか?」のチェックを ON** にしたままマージします(マージ済みブランチは残さない)。
+4. 手元も最新にします。
 
    ```bash
    git switch main
@@ -156,16 +171,28 @@ gh pr create --title "feat: フッターにデータ出典(PokeAPI)の表記を�
    git branch -d feature/add-credit-footer
    ```
 
-4. `git log --oneline` で自分の変更が main に入っていることを確認します。**これで1周完走です。**
+5. `git log --oneline` で自分の変更が main に入っていることを確認します。**これで1周完走です。**
+
+---
+
+## GitHub との違い(まとめ)
+
+| 項目 | GitHub | CodeCommit |
+|---|---|---|
+| 認証 | アカウント + トークン/SSH | IAM(HTTPS Git 認証情報 or git-remote-codecommit) |
+| フォーク | あり | **なし**(同一リポジトリにブランチを push) |
+| PR テンプレート | 自動挿入される | **ないので説明欄に自分で書く** |
+| レビュー | Approve / Request changes / Resolve | 「承認」+ コメント返信(Resolve 機能なし) |
+| マージ方式 | Merge / Squash / Rebase | 早送り / スカッシュ / 3ウェイ |
 
 ---
 
 ## チェックリスト
 
-- [ ] PR のタイトルと本文だけで「何を・なぜ」が伝わる
+- [ ] PR のタイトルと説明だけで「何を・なぜ」が伝わる
 - [ ] push の前に `git diff` でセルフレビューした
 - [ ] レビュー指摘に「同じブランチへの追いコミット」で対応した
-- [ ] マージ後にブランチを削除し、手元の main を最新化した
+- [ ] マージ後にソースブランチを削除し、手元の main を最新化した
 
 ---
 
